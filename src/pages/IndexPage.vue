@@ -8,7 +8,6 @@
       title="待審核問題"
       v-model:pagination="pagination"
       hide-pagination
-      style="background: rgb(255, 254, 254)"
     >
       <template v-slot:top-right>
         <Search />
@@ -23,6 +22,7 @@
             icon="edit"
             class="q-mx-md"
             @click="editPop(props.row)"
+            v-if="useRoute().path !== '/trash'"
           ></q-btn>
           <q-btn
             dense
@@ -30,7 +30,7 @@
             flat
             icon="delete"
             class="q-mx-md"
-            @click="deleteSubmit"
+            @click="deleteSubmit(props.row.qa_id)"
           ></q-btn>
         </q-td>
       </template>
@@ -95,50 +95,66 @@
       </q-card-actions>
     </q-card>
   </q-dialog>
-  {{ selectRow }}
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, reactive } from 'vue';
+import { ref, computed, watch, Ref } from 'vue';
 import Search from './Components/Table/SearchTable.vue';
 import OrderSelect from './Components/Table/OrderTable.vue';
 import { columns } from './Components/Table/Columns';
 import Swal from 'sweetalert2';
+import { useRouter, useRoute } from 'vue-router';
 
+type SelectRow = {
+  qa_id: number;
+  qa_question: string;
+  qa_answer: string;
+  office_id: number;
+  office_name: string;
+  user_id: string;
+  qa_asktime: string;
+};
+const initialize = {
+  qa_id: -1,
+  qa_question: '',
+  qa_answer: '',
+  office_id: -1,
+  office_name: '',
+  user_id: '',
+  qa_asktime: '',
+};
 const update = ref(0);
+
+//pagination
 const pagination = ref({
   sortBy: 'desc',
   descending: false,
   page: 1,
   rowsPerPage: 3,
-  // rowsNumber: xx if getting data from a server
 });
 
 const pagesNumber = computed(() =>
   Math.ceil(rows.length / pagination.value.rowsPerPage)
 );
 
+//actionBtn
+const deleteSubmit = (qa_id: number) => {
+  Swal.fire({
+    showConfirmButton: false,
+    title: '刪除成功',
+    icon: 'success',
+    timer: 1200,
+  });
+};
+
+//editPop
 const open = ref(false);
-const selectRow = ref(null);
+const selectRow: Ref<SelectRow> = ref(initialize);
 const editPop = (data: any) => {
   open.value = true;
   selectRow.value = data;
 };
-watch(open, () => {
-  if (open.value) return;
-  selectRow.value = 'nothing';
-});
 
-const options = computed(() => {
-  return offices
-    .filter((x) => x.office_name !== selectRow.value.office_name)
-    .map((x) => x.office_name);
-});
-const offices = [
-  { office_id: 1, office_name: '資管' },
-  { office_id: 2, office_name: '統資' },
-  { office_id: 3, office_name: '圖資' },
-];
 const editSubmit = () => {
   const officeId = offices.filter(
     (x) => x.office_name === selectRow.value.office_name
@@ -152,30 +168,23 @@ const editSubmit = () => {
     timer: 1200,
   });
 };
-const deleteSubmit = () => {
-  Swal.fire({
-    title: '確定刪除?',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#d33',
-    cancelButtonColor: '#3085d6',
-    confirmButtonText: '確認刪除',
-    cancelButtonText: '取消',
-  }).then((result) => {
-    if (result.isConfirmed) {
-      // const del = async () => {
-      //   await deleteDoc(doc(db, 'users', id));
-      // };
-      // del();
-      Swal.fire({
-        showConfirmButton: false,
-        title: '刪除成功',
-        icon: 'success',
-        timer: 1200,
-      });
-    }
-  });
-};
+
+watch(open, () => {
+  if (open.value) return;
+  selectRow.value = initialize;
+});
+
+const options = computed(() => {
+  return offices
+    .filter((x) => x.office_name !== selectRow.value.office_name)
+    .map((x) => x.office_name);
+});
+const offices = [
+  { office_id: 1, office_name: '資管' },
+  { office_id: 2, office_name: '統資' },
+  { office_id: 3, office_name: '圖資' },
+];
+
 const rows = [
   {
     qa_id: 1,

@@ -1,41 +1,39 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
-      <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="toggleLeftDrawer"
-        />
-
-        <q-toolbar-title>
-          Quasar App
-        </q-toolbar-title>
-
-        <div>Quasar v{{ $q.version }}</div>
-      </q-toolbar>
-    </q-header>
-
+  <q-layout view="hHh Lpr lff">
     <q-drawer
-      v-model="leftDrawerOpen"
+      v-model="drawer"
       show-if-above
+      :mini="miniState"
+      @mouseover="miniState = false"
+      @mouseout="miniState = true"
+      :width="200"
+      :breakpoint="500"
       bordered
     >
-      <q-list>
-        <q-item-label
-          header
-        >
-          Essential Links
-        </q-item-label>
+      <q-list padding>
+        <q-item v-ripple>
+          <q-item-section avatar>
+            <q-icon name="chat" />
+          </q-item-section>
 
-        <EssentialLink
-          v-for="link in essentialLinks"
-          :key="link.title"
-          v-bind="link"
-        />
+          <q-item-section> QAmpus </q-item-section>
+        </q-item>
+        <q-item
+          v-for="menu in menus"
+          :key="menu.title"
+          :active="menu.title == current"
+          active-class="bg-light-blue-13 text-grey-1"
+          v-ripple
+          clickable
+          @click="currentChange(menu.title)"
+          :to="menu.label"
+        >
+          <q-item-section avatar>
+            <q-icon :name="menu.icon" />
+          </q-item-section>
+
+          <q-item-section> {{ menu.title }} </q-item-section>
+        </q-item>
       </q-list>
     </q-drawer>
 
@@ -47,56 +45,30 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import EssentialLink, { EssentialLinkProps } from 'components/EssentialLink.vue';
+import { useRouter, useRoute } from 'vue-router';
 
-const essentialLinks: EssentialLinkProps[] = [
+const drawer = ref(false);
+const miniState = ref(true);
+const current = ref('待確認問題');
+const currentChange = (title: string) => {
+  current.value = title;
+};
+
+const menus = [
   {
-    title: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev'
-  },
-  {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework'
-  },
-  {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
+    title: '待確認問題',
     icon: 'chat',
-    link: 'https://chat.quasar.dev'
+    label: 'pending',
   },
   {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev'
+    title: '問答集',
+    icon: 'chat',
+    label: 'QA',
   },
   {
-    title: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev'
+    title: '垃圾桶',
+    icon: 'chat',
+    label: 'trash',
   },
-  {
-    title: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev'
-  },
-  {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev'
-  }
 ];
-
-const leftDrawerOpen = ref(false)
-
-function toggleLeftDrawer() {
-  leftDrawerOpen.value = !leftDrawerOpen.value
-}
 </script>

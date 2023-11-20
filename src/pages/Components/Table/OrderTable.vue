@@ -1,7 +1,7 @@
 <template>
   <q-select
     filled
-    v-model="classification"
+    v-model="orderArr"
     :options="options"
     class="q-ml-sm"
     dense
@@ -15,8 +15,8 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-const classification = ref('最新');
+const orderArr = ref('最新');
 const options = computed(() => {
-  return classification.value == '最新' ? ['舊'] : ['最新'];
+  return orderArr.value == '最新' ? ['最舊'] : ['最新'];
 });
 </script>
